@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jogo da Memória — Mais 60</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple: #430593;
+    --purple-deep: #2E0466;
+    --purple-light: #6B2FC7;
+    --green: #27CC95;
+    --green-dark: #1CA378;
+    --white: #FFFFFF;
+    --cream: #F6F1FC;
+    --danger: #E4483B;
+    --shadow: rgba(30,4,70,0.35);
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html, body{
+    margin:0; padding:0; width:100%; height:100%;
+    background: radial-gradient(ellipse at 50% -10%, var(--purple-light) 0%, var(--purple) 45%, var(--purple-deep) 100%);
+    font-family: 'Poppins', 'Segoe UI', Verdana, Arial, sans-serif;
+    overflow: hidden;
+    color: var(--white);
+  }
+  #app{ position: relative; width:100vw; height:100vh; }
+  .screen{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition: opacity .4s ease; padding: 3vh 4vw; text-align:center; }
+  .screen.active{ opacity:1; pointer-events:auto; }
+  .deco{ position:absolute; border-radius:50%; opacity:0.10; background: var(--green); pointer-events:none; }
+
+  .logo-purple{ height: clamp(34px,4.2vh,54px); }
+  .logo-white{ height: clamp(34px,4.2vh,54px); }
+
+  /* ---------- ATTRACT ---------- */
+  #attractScreen{ cursor: pointer; }
+  .attract-logo-row{ display:flex; align-items:center; justify-content:center; gap: 1.6vw; margin-bottom: 3vh; flex-wrap: wrap; }
+  .attract-logo-row img{ height: clamp(40px,5.6vh,68px); width:auto; }
+  .attract-logo-row img.attract-logo-grande{ height: clamp(70px,10vh,130px); }
+  .attract-logo-badge{ display:inline-flex; align-items:center; background: var(--white); border-radius: 16px; padding: 1.2vh 2vw; box-shadow: 0 6px 14px var(--shadow); }
+  .attract-logo-badge img{ height: clamp(32px,4.4vh,54px); }
+  .attract-logo-sep{ font-size: clamp(20px,2.8vh,30px); color: var(--cream); opacity:0.7; font-weight:600; }
+  .attract-logo-text{ font-size: clamp(24px,3.2vh,36px); font-weight:800; letter-spacing:1px; color: var(--white); }
+
+  /* ---------- CARTAS TEMÁTICAS (texto / logos) ---------- */
+  .face-front .card-word{ font-size: clamp(12px,1.9vh,17px); font-weight:800; color: var(--purple); text-align:center; padding: 6%; line-height:1.2; overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+  .face-front .card-logo-pair{ display:flex; align-items:center; justify-content:center; gap: 8%; width: 82%; }
+  .face-front .card-logo-pair img{ width:auto; height: auto; max-width: 46%; max-height: 60%; }
+  .attract-title{ font-size: clamp(38px,6.4vh,76px); font-weight:800; line-height:1.08; margin: 0 0 2vh 0; }
+  .attract-title span{ color: var(--green); }
+  .attract-sub{ font-size: clamp(20px,2.6vh,30px); font-weight:400; color: var(--cream); max-width: 62vw; margin-bottom: 6vh; }
+  .pulse-cta{
+    font-size: clamp(24px,3.2vh,36px); font-weight:700; color: var(--purple-deep);
+    background: var(--green); padding: 2.4vh 6vw; border-radius: 60px;
+    box-shadow: 0 8px 0 var(--green-dark), 0 16px 30px var(--shadow);
+    animation: pulseCta 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseCta{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.045);} }
+  .attract-qr-wrap{
+    position:absolute; right: 4vw; bottom: 4vh; display:flex; flex-direction:column; align-items:center; gap:8px;
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 14px 16px;
+  }
+  .attract-qr-wrap svg{ width: clamp(70px,9vh,110px); height: clamp(70px,9vh,110px); border-radius: 8px; }
+  .attract-qr-label{ font-size: clamp(11px,1.3vh,14px); color: var(--cream); font-weight:500; }
+  #adminHotspot{ position:absolute; left:0; bottom:0; width: 60px; height:60px; opacity:0; }
+  #backToHubBtn{
+    position:absolute; top: 2.4vh; left: 2.4vw; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25); color: var(--cream); font-family: inherit;
+    font-size: clamp(12px,1.4vh,15px); font-weight:600; border-radius: 30px; padding: 1vh 2vw; cursor:pointer;
+  }
+
+  /* ---------- MODO TESTE ---------- */
+  #testBadge{
+    position:fixed; top:0; left:0; right:0; z-index: 200; text-align:center;
+    background: repeating-linear-gradient(45deg, #E4483B, #E4483B 12px, #FFD75E 12px, #FFD75E 24px);
+    color: var(--white); font-weight:800; font-size: clamp(11px,1.3vh,14px); letter-spacing:1px;
+    padding: 4px 0; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .test-skip-btn{
+    margin-top: 1.2vh; background: transparent; border: 2px dashed #E4483B; color: #E4483B;
+    font-family: inherit; font-size: clamp(13px,1.5vh,16px); font-weight:700; border-radius: 40px;
+    padding: 1.2vh 3vw; cursor:pointer;
+  }
+
+  /* ---------- SHARED FORM STYLES ---------- */
+  .form-card{
+    background: rgba(255,255,255,0.06); border-radius: 28px; padding: 5vh 5vw; width: min(640px, 88vw);
+    display:flex; flex-direction:column; gap: 2.4vh;
+  }
+  .form-title{ font-size: clamp(28px,4vh,42px); font-weight:800; margin: 0 0 0.5vh 0; }
+  .form-sub{ font-size: clamp(16px,2vh,20px); color: var(--cream); margin: 0 0 1vh 0; }
+  .field label{ display:block; font-size: clamp(15px,1.8vh,19px); font-weight:600; margin-bottom: 8px; text-align:left; color: var(--cream); }
+  .field input[type=text], .field input[type=tel], .field input[type=email]{
+    width: 100%; font-family: inherit; font-size: clamp(18px,2.2vh,24px); padding: 1.6vh 1.4vw;
+    border-radius: 14px; border: none; outline: none; background: var(--white); color: var(--purple-deep); font-weight:500;
+  }
+  .field input::placeholder{ color: #9B8FB8; }
+  .consent{ display:flex; align-items:flex-start; gap: 12px; text-align:left; }
+  .consent input{ width: 26px; height:26px; margin-top:2px; accent-color: var(--green); flex-shrink:0; }
+  .consent label{ font-size: clamp(13px,1.6vh,16px); color: var(--cream); line-height:1.4; }
+  .form-actions{ display:flex; gap: 16px; margin-top: 1vh; justify-content:center; flex-wrap:wrap; }
+  .field-error{ color: #FFD9D6; font-size: clamp(13px,1.5vh,15px); text-align:left; min-height: 18px; margin-top:6px; }
+
+  .btn-primary{
+    font-size: clamp(20px,2.6vh,28px); font-weight:700; color: var(--purple-deep);
+    background: var(--green); border:none; border-radius: 60px;
+    padding: 1.8vh 5vw; cursor:pointer; box-shadow: 0 6px 0 var(--green-dark), 0 12px 20px var(--shadow);
+    transition: transform .1s ease;
+  }
+  .btn-primary:active{ transform: translateY(5px); box-shadow: 0 1px 0 var(--green-dark), 0 4px 10px var(--shadow); }
+  .btn-primary:disabled{ opacity:0.45; cursor:default; }
+  .btn-ghost{
+    font-size: clamp(16px,2vh,22px); font-weight:600; color: var(--white);
+    background: transparent; border: 2px solid rgba(255,255,255,0.4); border-radius: 60px;
+    padding: 1.6vh 3.6vw; cursor:pointer;
+  }
+  .btn-ghost:active{ background: rgba(255,255,255,0.12); }
+
+  /* ---------- RULES ---------- */
+  .rules-icon{ font-size: clamp(56px,8vh,90px); margin-bottom: 2vh; }
+  .rules-title{ font-size: clamp(32px,5vh,54px); font-weight:800; margin: 0 0 2vh 0; }
+  .rules-box{ background: rgba(255,255,255,0.08); border-radius: 24px; padding: 3.5vh 4vw; max-width: 700px; margin-bottom: 4vh; }
+  .rules-box p{ font-size: clamp(19px,2.4vh,26px); line-height:1.55; margin: 0 0 1.4vh 0; }
+  .rules-box p:last-child{ margin-bottom:0; }
+  .rules-box b{ color: var(--green); }
+
+  /* ---------- GAME HUD ---------- */
+  #hud{
+    position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 2.4vh 3vw; z-index: 5;
+  }
+  .hud-pill{ background: rgba(255,255,255,0.1); border-radius: 40px; padding: 1.1vh 2.4vw; display:flex; align-items:center; gap:12px; }
+  .hud-label{ font-size: clamp(12px,1.4vh,16px); color: var(--cream); font-weight:500; }
+  .hud-value{ font-size: clamp(24px,3vh,34px); font-weight:800; color: var(--white); }
+  #timerPill.warn .hud-value{ color: #FFD75E; }
+  #timerPill.danger .hud-value{ color: #FF8A80; animation: timerPulse .6s ease-in-out infinite; }
+  @keyframes timerPulse{ 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.12);} }
+  #cancelGameBtn{
+    background: rgba(228,72,59,0.85); color: var(--white); border:none; border-radius: 40px;
+    font-size: clamp(14px,1.6vh,18px); font-weight:600; padding: 1.1vh 2vw; cursor:pointer;
+  }
+  #timeBar{ position:absolute; top:0; left:0; height: 6px; background: var(--green); transition: width 1s linear, background .3s ease; z-index:5; }
+
+  /* ---------- BOARD ---------- */
+  #board{
+    display:grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 1.6vh;
+    width: min(92vw, 720px); height: 74vh; margin-top: 3vh;
+  }
+  .card{ position: relative; perspective: 800px; cursor:pointer; width: 100%; height: 100%; }
+  .card-inner{ position:absolute; inset:0; transition: transform .4s cubic-bezier(.3,.9,.3,1); transform-style: preserve-3d; }
+  .card.flipped .card-inner, .card.matched .card-inner{ transform: rotateY(180deg); }
+  .face{ position:absolute; inset:0; backface-visibility:hidden; border-radius: 16px; display:flex; align-items:center; justify-content:center; }
+  .face-back{ background: linear-gradient(135deg, var(--purple-light) 0%, var(--purple) 100%); box-shadow: 0 6px 14px var(--shadow), inset 0 0 0 3px rgba(255,255,255,0.18); }
+  .face-back .mark{ font-size: clamp(15px,2.1vh,24px); font-weight:800; color: rgba(255,255,255,0.4); letter-spacing:1px; }
+  .face-front{ background: var(--white); transform: rotateY(180deg); box-shadow: 0 6px 14px var(--shadow); }
+  .card.matched .face-front{ background: #EAFBF4; box-shadow: 0 0 0 4px var(--green), 0 6px 18px var(--shadow); }
+  .face-front svg{ width: 52%; height: 52%; }
+  .face-front > img{ width: 56%; height: 56%; object-fit: contain; }
+  .card.matched{ animation: pop .4s ease; }
+  @keyframes pop{ 0%{ transform: scale(1);} 40%{ transform: scale(1.08);} 100%{ transform: scale(1);} }
+  .card.shake .card-inner{ animation: shake .4s ease; }
+  @keyframes shake{ 0%,100%{ transform: rotateY(180deg) translateX(0);} 25%{ transform: rotateY(180deg) translateX(-3%);} 75%{ transform: rotateY(180deg) translateX(3%);} }
+
+  /* ---------- RESULT ---------- */
+  .result-badge{ font-size: clamp(15px,1.8vh,19px); font-weight:700; letter-spacing: 3px; color: var(--green); margin-bottom: 1.2vh; }
+  .result-title{ font-size: clamp(42px,6.4vh,76px); font-weight:800; margin: 0 0 1.6vh 0; line-height:1.1; }
+  .result-title.win{ color: var(--green); }
+  .result-title.lose{ color: var(--white); }
+  .result-sub{ font-size: clamp(19px,2.4vh,27px); color: var(--cream); margin-bottom: 3.4vh; max-width: 60vw; }
+  .stats-row{ display:flex; gap: 5vw; margin-bottom: 4vh; }
+  .stat{ text-align:center; }
+  .stat .v{ font-size: clamp(30px,4.2vh,44px); font-weight:800; color: var(--green); }
+  .stat .k{ font-size: clamp(13px,1.6vh,17px); color: var(--cream); }
+  .prize-card{
+    background: var(--green); color: var(--purple-deep); border-radius: 24px; padding: 2.2vh 5vw; margin-bottom: 4vh;
+    font-size: clamp(20px,2.6vh,28px); font-weight:800;
+  }
+  .prize-card.participation{ background: rgba(255,255,255,0.14); color: var(--white); }
+  .result-qr-wrap{ display:flex; flex-direction:column; align-items:center; gap: 10px; margin-bottom: 3vh; }
+  .result-qr-wrap svg{ width: clamp(96px,13vh,150px); height: clamp(96px,13vh,150px); border-radius: 10px; }
+  .result-qr-label{ font-size: clamp(14px,1.7vh,18px); color: var(--cream); }
+
+  .confetti{ position:absolute; top:-10px; border-radius:2px; opacity:0.95; z-index:20; }
+
+  /* ---------- ADMIN MODAL ---------- */
+  #adminModal{ position:fixed; inset:0; background: rgba(20,3,50,0.9); display:none; align-items:center; justify-content:center; z-index: 100; }
+  #adminModal.open{ display:flex; }
+  .admin-box{ background: var(--white); color: var(--purple-deep); border-radius: 20px; padding: 4vh 4vw; width: min(480px,86vw); text-align:center; }
+  .admin-box h3{ font-size: clamp(20px,2.6vh,26px); margin: 0 0 1.4vh 0; }
+  .admin-box .count{ font-size: clamp(40px,5.4vh,56px); font-weight:800; color: var(--purple); margin-bottom: 0.6vh; }
+  .admin-box .count-label{ font-size: 14px; color:#7A6A99; margin-bottom: 3vh; }
+  .admin-actions{ display:flex; flex-direction:column; gap: 12px; }
+  .admin-actions button{
+    font-family: inherit; font-size: clamp(15px,1.8vh,18px); font-weight:600; padding: 1.4vh 1vw;
+    border-radius: 14px; border: none; cursor:pointer;
+  }
+  #adminExportBtn{ background: var(--purple); color: var(--white); }
+  #adminClearBtn{ background: #FBEAF0; color: #99354a; }
+  #adminChangeThemeBtn{ background: #EAF1FB; color: #2A4E80; }
+  #adminCloseBtn{ background: #F1EFE8; color: #444441; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="testBadge" style="display:none;">MODO TESTE — leads não são salvos · remova ?test=1 da URL para uso real</div>
+
+  <!-- ATTRACT / IDLE SCREEN -->
+  <div class="screen active" id="attractScreen">
+    <div class="deco" style="width:44vh;height:44vh;top:-14vh;left:-14vh;"></div>
+    <div class="deco" style="width:32vh;height:32vh;bottom:-10vh;right:22vw;"></div>
+    <div class="attract-logo-row" id="attractLogoRow"></div>
+    <h1 class="attract-title" id="attractTitle">Jogo da <span>Memória</span></h1>
+    <p class="attract-sub" id="attractSub">Encontre os pares em até 1 minuto e concorra a um brinde. Toque na tela para começar!</p>
+    <div class="pulse-cta" id="pulseCta">Toque para jogar</div>
+    <div class="attract-qr-wrap" id="attractQrWrap"></div>
+    <button id="backToHubBtn">← Trocar tema</button>
+    <div id="adminHotspot"></div>
+  </div>
+
+  <!-- LEAD CAPTURE SCREEN -->
+  <div class="screen" id="leadScreen">
+    <div class="form-card">
+      <div>
+        <p class="form-title" id="leadTitle">Antes de começar</p>
+        <p class="form-sub" id="leadSub">Preencha seus dados para jogar e concorrer ao brinde.</p>
+      </div>
+      <div class="field">
+        <label for="inputNome">Nome completo</label>
+        <input type="text" id="inputNome" placeholder="Digite seu nome" autocomplete="off">
+        <div class="field-error" id="errNome"></div>
+      </div>
+      <div class="field">
+        <label for="inputTelefone">Telefone / WhatsApp</label>
+        <input type="tel" id="inputTelefone" placeholder="(00) 00000-0000" autocomplete="off">
+        <div class="field-error" id="errTelefone"></div>
+      </div>
+      <div class="field">
+        <label for="inputEmail">E-mail</label>
+        <input type="email" id="inputEmail" placeholder="seuemail@exemplo.com" autocomplete="off">
+        <div class="field-error" id="errEmail"></div>
+      </div>
+      <div class="consent">
+        <input type="checkbox" id="inputConsent">
+        <label for="inputConsent" id="consentLabel">Autorizo o uso dos meus dados para contato e a divulgação do resultado deste jogo, conforme a LGPD.</label>
+      </div>
+      <div class="form-actions">
+        <button class="btn-ghost" id="leadBackBtn">Voltar</button>
+        <button class="btn-primary" id="leadContinueBtn">Continuar</button>
+      </div>
+      <button class="test-skip-btn" id="testSkipBtn" style="display:none;">🧪 Pular formulário (modo teste)</button>
+    </div>
+  </div>
+
+  <!-- RULES SCREEN -->
+  <div class="screen" id="rulesScreen">
+    <div class="rules-icon">⏱</div>
+    <h2 class="rules-title" id="rulesTitle">Como funciona</h2>
+    <div class="rules-box" id="rulesBox"></div>
+    <div class="form-actions">
+      <button class="btn-ghost" id="rulesBackBtn">Voltar</button>
+      <button class="btn-primary" id="rulesStartBtn">Estou pronto, vamos lá!</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen" id="gameScreen">
+    <div id="timeBar"></div>
+    <div id="hud">
+      <div class="hud-pill" id="timerPill">
+        <div><div class="hud-label">Tempo restante</div><div class="hud-value" id="timeVal">01:00</div></div>
+      </div>
+      <div class="hud-pill">
+        <div><div class="hud-label">Pares encontrados</div><div class="hud-value"><span id="pairsVal">0</span>/8</div></div>
+      </div>
+      <button id="cancelGameBtn">Cancelar</button>
+    </div>
+    <div id="board"></div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div class="screen" id="resultScreen">
+    <div id="resultBadge" class="result-badge">RESULTADO</div>
+    <h2 id="resultTitle" class="result-title win">Parabéns!</h2>
+    <p id="resultSub" class="result-sub">Você encontrou todos os pares dentro do tempo.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="v" id="resultTime">00:00</div><div class="k">tempo</div></div>
+      <div class="stat"><div class="v" id="resultPairs">0/8</div><div class="k">pares</div></div>
+    </div>
+    <div class="prize-card" id="prizeCard">🎁 Você ganhou o brinde principal!</div>
+    <div class="result-qr-wrap">
+      <div id="resultQrWrap"></div>
+      <div class="result-qr-label" id="resultQrLabel">Aponte a câmera e conheça o Mais 60</div>
+    </div>
+    <button class="btn-primary" id="newPlayerBtn">Encerrar e liberar para o próximo jogador</button>
+  </div>
+
+  <div id="adminModal">
+    <div class="admin-box">
+      <h3>Painel administrativo</h3>
+      <div class="count" id="adminCount">0</div>
+      <div class="count-label">leads capturados neste dispositivo</div>
+      <div class="admin-actions">
+        <button id="adminExportBtn">Exportar leads (CSV)</button>
+        <button id="adminClearBtn">Apagar dados deste dispositivo</button>
+        <button id="adminChangeThemeBtn">Trocar tema</button>
+        <button id="adminCloseBtn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="qrcode.js"></script>
+<script src="themes.js"></script>
+<script>
+(function(){
+  // ======= TEMA =======
+  var params = new URLSearchParams(location.search);
+  var temaId = params.get('tema');
+  if (!THEMES[temaId]) temaId = 'mais60';
+  var theme = THEMES[temaId];
+  var TEST_MODE = params.get('test') === '1';
+
+  // ======= CONFIGURAÇÃO =======
+  var QR_URL = theme.qrUrl;
+  var GAME_SECONDS = 60;
+  var TOTAL_PAIRS = 8;
+
+  var ICON_COLOR = theme.icones.cor;
+  var ICONS = theme.cartas || [
+    '<svg viewBox="0 0 100 100"><path fill="'+ICON_COLOR+'" d="M50 88 C20 65 5 45 5 28 C5 12 18 2 32 2 C42 2 49 8 50 15 C51 8 58 2 68 2 C82 2 95 12 95 28 C95 45 80 65 50 88 Z"/></svg>',
+    '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="22" fill="'+ICON_COLOR+'"/><g stroke="'+ICON_COLOR+'" stroke-width="8" stroke-linecap="round"><line x1="50" y1="4" x2="50" y2="18"/><line x1="50" y1="82" x2="50" y2="96"/><line x1="4" y1="50" x2="18" y2="50"/><line x1="82" y1="50" x2="96" y2="50"/><line x1="17" y1="17" x2="27" y2="27"/><line x1="73" y1="73" x2="83" y2="83"/><line x1="17" y1="83" x2="27" y2="73"/><line x1="73" y1="27" x2="83" y2="17"/></g></svg>',
+    '<svg viewBox="0 0 100 100"><path fill="'+ICON_COLOR+'" d="M8 15 C8 12 10 10 14 10 C30 10 42 14 50 22 C58 14 70 10 86 10 C90 10 92 12 92 15 L92 78 C92 81 90 83 86 83 C70 83 58 87 50 95 C42 87 30 83 14 83 C10 83 8 81 8 78 Z"/><rect x="47" y="24" width="6" height="66" fill="#430593"/></svg>',
+    '<svg viewBox="0 0 100 100"><path fill="'+ICON_COLOR+'" d="M62 8 L62 60 A16 14 0 1 1 54 46 L54 24 L38 28 L38 74 A16 14 0 1 1 30 60 L30 18 Z"/></svg>',
+    '<svg viewBox="0 0 100 100"><g fill="none" stroke="'+ICON_COLOR+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="72" r="18"/><circle cx="76" cy="72" r="18"/><path d="M24 72 L44 34 L66 34"/><path d="M44 34 L58 72 L76 72"/><path d="M44 34 L34 20 L48 20"/></g></svg>',
+    '<svg viewBox="0 0 100 100"><g fill="none" stroke="'+ICON_COLOR+'" stroke-width="8" stroke-linecap="round"><path d="M14 40 L78 40 L74 72 A16 10 0 0 1 18 72 Z"/><path d="M78 44 C94 44 94 66 78 66"/><line x1="10" y1="86" x2="90" y2="86"/></g></svg>',
+    '<svg viewBox="0 0 100 100"><g fill="'+ICON_COLOR+'"><circle cx="50" cy="30" r="14"/><circle cx="50" cy="70" r="14"/><circle cx="30" cy="50" r="14"/><circle cx="70" cy="50" r="14"/><circle cx="50" cy="50" r="12" fill="#27CC95"/></g></svg>',
+    '<svg viewBox="0 0 100 100"><path fill="'+ICON_COLOR+'" d="M50 4 L61 36 L96 36 L67 57 L78 90 L50 70 L22 90 L33 57 L4 36 L39 36 Z"/></svg>'
+  ];
+
+  var els = {
+    attract: document.getElementById('attractScreen'),
+    lead: document.getElementById('leadScreen'),
+    rules: document.getElementById('rulesScreen'),
+    game: document.getElementById('gameScreen'),
+    result: document.getElementById('resultScreen'),
+    board: document.getElementById('board'),
+    timeVal: document.getElementById('timeVal'),
+    timerPill: document.getElementById('timerPill'),
+    timeBar: document.getElementById('timeBar'),
+    pairsVal: document.getElementById('pairsVal'),
+    cancelGameBtn: document.getElementById('cancelGameBtn'),
+    leadBackBtn: document.getElementById('leadBackBtn'),
+    leadContinueBtn: document.getElementById('leadContinueBtn'),
+    rulesBackBtn: document.getElementById('rulesBackBtn'),
+    rulesStartBtn: document.getElementById('rulesStartBtn'),
+    newPlayerBtn: document.getElementById('newPlayerBtn'),
+    resultBadge: document.getElementById('resultBadge'),
+    resultTitle: document.getElementById('resultTitle'),
+    resultSub: document.getElementById('resultSub'),
+    resultTime: document.getElementById('resultTime'),
+    resultPairs: document.getElementById('resultPairs'),
+    prizeCard: document.getElementById('prizeCard'),
+    attractQrWrap: document.getElementById('attractQrWrap'),
+    resultQrWrap: document.getElementById('resultQrWrap'),
+    adminHotspot: document.getElementById('adminHotspot'),
+    backToHubBtn: document.getElementById('backToHubBtn'),
+    adminModal: document.getElementById('adminModal'),
+    adminCount: document.getElementById('adminCount'),
+    adminExportBtn: document.getElementById('adminExportBtn'),
+    adminClearBtn: document.getElementById('adminClearBtn'),
+    adminChangeThemeBtn: document.getElementById('adminChangeThemeBtn'),
+    adminCloseBtn: document.getElementById('adminCloseBtn'),
+    attractLogoRow: document.getElementById('attractLogoRow'),
+    attractTitle: document.getElementById('attractTitle'),
+    attractSub: document.getElementById('attractSub'),
+    pulseCta: document.getElementById('pulseCta'),
+    leadTitle: document.getElementById('leadTitle'),
+    leadSub: document.getElementById('leadSub'),
+    consentLabel: document.getElementById('consentLabel'),
+    rulesTitle: document.getElementById('rulesTitle'),
+    rulesBox: document.getElementById('rulesBox'),
+    resultQrLabel: document.getElementById('resultQrLabel'),
+    testBadge: document.getElementById('testBadge'),
+    testSkipBtn: document.getElementById('testSkipBtn')
+  };
+
+  if (TEST_MODE){
+    els.testBadge.style.display = '';
+    els.testSkipBtn.style.display = '';
+  }
+
+  function showScreen(name){
+    ['attract','lead','rules','game','result'].forEach(function(s){ els[s].classList.remove('active'); });
+    els[name].classList.add('active');
+    resetIdleWatch();
+  }
+
+  // ======= APLICAÇÃO DO TEMA =======
+  function applyTheme(){
+    document.title = theme.textos.metaTitulo;
+    var cores = theme.cores;
+    var root = document.documentElement.style;
+    root.setProperty('--purple', cores.purple);
+    root.setProperty('--purple-deep', cores.purpleDeep);
+    root.setProperty('--purple-light', cores.purpleLight);
+    root.setProperty('--green', cores.green);
+    root.setProperty('--green-dark', cores.greenDark);
+
+    els.attractLogoRow.innerHTML = '';
+    var logos = theme.logos || (theme.logoDataUri ? [{ src: theme.logoDataUri, alt: theme.nome }] : []);
+    if (logos.length){
+      logos.forEach(function(logo, i){
+        if (i > 0){
+          var sep = document.createElement('span');
+          sep.className = 'attract-logo-sep';
+          sep.textContent = '+';
+          els.attractLogoRow.appendChild(sep);
+        }
+        var img = document.createElement('img');
+        img.src = logo.src;
+        img.alt = logo.alt || '';
+        if (logo.grande) img.className = 'attract-logo-grande';
+        if (logo.selo){
+          var badge = document.createElement('span');
+          badge.className = 'attract-logo-badge';
+          badge.appendChild(img);
+          els.attractLogoRow.appendChild(badge);
+        } else {
+          els.attractLogoRow.appendChild(img);
+        }
+      });
+    } else {
+      var span = document.createElement('span');
+      span.className = 'attract-logo-text';
+      span.textContent = theme.nome;
+      els.attractLogoRow.appendChild(span);
+    }
+
+    els.attractTitle.innerHTML = theme.textos.attractTitleHtml;
+    els.attractSub.textContent = theme.textos.attractSub;
+    els.pulseCta.textContent = theme.textos.pulseCta;
+    els.leadTitle.textContent = theme.textos.leadTitle;
+    els.leadSub.textContent = theme.textos.leadSub;
+    els.consentLabel.textContent = theme.textos.consent;
+    els.rulesTitle.textContent = theme.textos.rulesTitle;
+    els.rulesBox.innerHTML = theme.textos.rulesLines.map(function(l){ return '<p>' + l + '</p>'; }).join('');
+    els.resultQrLabel.textContent = theme.textos.qrLabel;
+  }
+  applyTheme();
+  syncPendingLeads();
+
+  // ======= QR CODE RENDER =======
+  function renderQr(container, size){
+    try{
+      var qr = qrcode(0, 'M');
+      qr.addData(QR_URL);
+      qr.make();
+      container.innerHTML = qr.createSvgTag({cellSize: size || 4, margin: 2});
+    }catch(e){
+      container.innerHTML = '';
+    }
+  }
+  renderQr(els.attractQrWrap, 3);
+
+  // ======= LEAD FORM =======
+  var currentLead = null;
+
+  function validateLead(){
+    var nome = document.getElementById('inputNome').value.trim();
+    var telefone = document.getElementById('inputTelefone').value.trim();
+    var email = document.getElementById('inputEmail').value.trim();
+    var consent = document.getElementById('inputConsent').checked;
+    var ok = true;
+
+    document.getElementById('errNome').textContent = '';
+    document.getElementById('errTelefone').textContent = '';
+    document.getElementById('errEmail').textContent = '';
+
+    if (nome.length < 2){
+      document.getElementById('errNome').textContent = 'Digite seu nome completo.';
+      ok = false;
+    }
+    if (telefone.replace(/\D/g,'').length < 8){
+      document.getElementById('errTelefone').textContent = 'Digite um telefone válido.';
+      ok = false;
+    }
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk){
+      document.getElementById('errEmail').textContent = 'Digite um e-mail válido.';
+      ok = false;
+    }
+    if (!consent){
+      ok = false;
+    }
+    if (ok){
+      currentLead = { nome: nome, telefone: telefone, email: email, timestamp: new Date().toISOString() };
+    }
+    return ok;
+  }
+
+  function clearLeadForm(){
+    document.getElementById('inputNome').value = '';
+    document.getElementById('inputTelefone').value = '';
+    document.getElementById('inputEmail').value = '';
+    document.getElementById('inputConsent').checked = false;
+    document.getElementById('errNome').textContent = '';
+    document.getElementById('errTelefone').textContent = '';
+    document.getElementById('errEmail').textContent = '';
+  }
+
+  function saveLeadResult(resultado, seconds, pairsFound){
+    if (TEST_MODE) return;
+    var record = {
+      id: generateLeadId(),
+      tema: theme.id,
+      nome: currentLead.nome,
+      telefone: currentLead.telefone,
+      email: currentLead.email,
+      data: currentLead.timestamp,
+      resultado: resultado,
+      tempo_segundos: seconds,
+      pares_encontrados: pairsFound,
+      enviado: false
+    };
+    try{
+      var list = JSON.parse(localStorage.getItem(LEADS_STORAGE_KEY) || '[]');
+      list.push(record);
+      localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(list));
+    }catch(e){}
+    // Envia pra planilha central em segundo plano; se falhar (sem wifi),
+    // o registro já está salvo no tablet e será reenviado na próxima carga.
+    sendLeadToSheet(record).then(function(){
+      record.enviado = true;
+      try{ localStorage.setItem(LEADS_STORAGE_KEY, JSON.stringify(list)); }catch(e){}
+    }).catch(function(){});
+  }
+
+  function getLeads(){
+    try{ return JSON.parse(localStorage.getItem(LEADS_STORAGE_KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+
+  // ======= GAME STATE =======
+  var state = { cards: [], flipped: [], matchedCount: 0, secondsLeft: GAME_SECONDS, timer: null, locked: false };
+
+  function shuffle(arr){
+    for (var i = arr.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function buildBoard(){
+    state.matchedCount = 0;
+    state.flipped = [];
+    state.locked = false;
+    state.secondsLeft = GAME_SECONDS;
+    els.pairsVal.textContent = '0';
+    updateTimerDisplay();
+    els.timerPill.classList.remove('warn','danger');
+    els.timeBar.style.width = '100%';
+    els.timeBar.style.background = 'var(--green)';
+    clearInterval(state.timer);
+
+    var chosenIcons = shuffle(ICONS.slice()).slice(0, TOTAL_PAIRS);
+    var deck = shuffle(chosenIcons.concat(chosenIcons));
+    state.cards = deck;
+
+    els.board.innerHTML = '';
+    deck.forEach(function(icon, idx){
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.index = idx;
+      card.dataset.icon = icon;
+      card.innerHTML =
+        '<div class="card-inner">' +
+          '<div class="face face-back"><span class="mark">' + theme.textos.cardMark + '</span></div>' +
+          '<div class="face face-front">' + icon + '</div>' +
+        '</div>';
+      card.addEventListener('click', onCardClick);
+      els.board.appendChild(card);
+    });
+
+    state.timer = setInterval(function(){
+      state.secondsLeft--;
+      updateTimerDisplay();
+      if (state.secondsLeft <= 0){
+        clearInterval(state.timer);
+        finishGame(false);
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay(){
+    var s = Math.max(0, state.secondsLeft);
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    els.timeVal.textContent = (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+    var pct = Math.max(0, (s / GAME_SECONDS) * 100);
+    els.timeBar.style.width = pct + '%';
+    els.timerPill.classList.remove('warn','danger');
+    if (s <= 10){
+      els.timerPill.classList.add('danger');
+      els.timeBar.style.background = '#E4483B';
+    } else if (s <= 20){
+      els.timerPill.classList.add('warn');
+      els.timeBar.style.background = '#FFD75E';
+    } else {
+      els.timeBar.style.background = 'var(--green)';
+    }
+  }
+
+  function onCardClick(e){
+    var card = e.currentTarget;
+    if (state.locked) return;
+    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    if (state.flipped.length >= 2) return;
+
+    card.classList.add('flipped');
+    state.flipped.push(card);
+
+    if (state.flipped.length === 2){
+      state.locked = true;
+      var a = state.flipped[0], b = state.flipped[1];
+      var isMatch = a.dataset.icon === b.dataset.icon;
+
+      setTimeout(function(){
+        if (isMatch){
+          a.classList.add('matched');
+          b.classList.add('matched');
+          state.matchedCount++;
+          els.pairsVal.textContent = state.matchedCount;
+          if (state.matchedCount === TOTAL_PAIRS){
+            clearInterval(state.timer);
+            setTimeout(function(){ finishGame(true); }, 500);
+          }
+        } else {
+          a.classList.add('shake');
+          b.classList.add('shake');
+          setTimeout(function(){
+            a.classList.remove('flipped','shake');
+            b.classList.remove('flipped','shake');
+          }, 400);
+        }
+        state.flipped = [];
+        state.locked = false;
+      }, isMatch ? 300 : 700);
+    }
+  }
+
+  function finishGame(won){
+    state.locked = true;
+    var secondsUsed = GAME_SECONDS - Math.max(0, state.secondsLeft);
+    saveLeadResult(won ? 'venceu' : 'participou', secondsUsed, state.matchedCount);
+
+    var m = Math.floor(secondsUsed / 60), s = secondsUsed % 60;
+    els.resultTime.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    els.resultPairs.textContent = state.matchedCount + '/' + TOTAL_PAIRS;
+
+    if (won){
+      els.resultBadge.textContent = 'RESULTADO';
+      els.resultTitle.textContent = theme.textos.resultWinTitle;
+      els.resultTitle.className = 'result-title win';
+      els.resultSub.textContent = theme.textos.resultWinSub;
+      els.prizeCard.textContent = theme.textos.prizeWin;
+      els.prizeCard.className = 'prize-card';
+    } else {
+      els.resultBadge.textContent = 'RESULTADO';
+      els.resultTitle.textContent = theme.textos.resultLoseTitle;
+      els.resultTitle.className = 'result-title lose';
+      els.resultSub.textContent = theme.textos.resultLoseSub;
+      els.prizeCard.textContent = theme.textos.prizeLose;
+      els.prizeCard.className = 'prize-card participation';
+    }
+    renderQr(els.resultQrWrap, 3);
+    els.resultQrLabel.textContent = theme.textos.qrLabel;
+    showScreen('result');
+    if (won) launchConfetti();
+  }
+
+  function launchConfetti(){
+    var colors = ['#27CC95','#430593','#FFFFFF','#6B2FC7'];
+    for (var i = 0; i < 60; i++){
+      (function(i){
+        var el = document.createElement('div');
+        el.className = 'confetti';
+        var size = 6 + Math.random() * 8;
+        el.style.width = size + 'px';
+        el.style.height = (size * 0.6) + 'px';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+        document.getElementById('app').appendChild(el);
+        var duration = 2200 + Math.random() * 1800;
+        var drift = (Math.random() - 0.5) * 200;
+        el.animate([
+          { transform: el.style.transform + ' translate(0,0)', opacity: 1 },
+          { transform: el.style.transform + ' translate(' + drift + 'px, 100vh)', opacity: 0.9 }
+        ], { duration: duration, easing: 'ease-in' });
+        setTimeout(function(){ el.remove(); }, duration);
+      })(i);
+    }
+  }
+
+  // ======= NAVIGATION =======
+  els.backToHubBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    location.href = 'index.html';
+  });
+  els.attract.addEventListener('click', function(e){
+    if (e.target.closest('#adminHotspot') || e.target.closest('#backToHubBtn')) return;
+    clearLeadForm();
+    showScreen('lead');
+  });
+  els.leadBackBtn.addEventListener('click', function(){ showScreen('attract'); });
+  els.leadContinueBtn.addEventListener('click', function(){
+    if (validateLead()) showScreen('rules');
+  });
+  els.testSkipBtn.addEventListener('click', function(){
+    currentLead = { nome: 'Teste', telefone: '00000000000', email: 'teste@teste.com', timestamp: new Date().toISOString() };
+    showScreen('rules');
+  });
+  els.rulesBackBtn.addEventListener('click', function(){ showScreen('lead'); });
+  els.rulesStartBtn.addEventListener('click', function(){
+    buildBoard();
+    showScreen('game');
+  });
+  els.cancelGameBtn.addEventListener('click', function(){
+    clearInterval(state.timer);
+    showScreen('attract');
+  });
+  els.newPlayerBtn.addEventListener('click', function(){
+    showScreen('attract');
+  });
+
+  // ======= IDLE AUTO-RESET (kiosk safety) =======
+  var idleTimeout = null;
+  function resetIdleWatch(){
+    clearTimeout(idleTimeout);
+    if (!els.attract.classList.contains('active')){
+      idleTimeout = setTimeout(function(){
+        clearInterval(state.timer);
+        showScreen('attract');
+      }, 40000);
+    }
+  }
+  document.addEventListener('click', resetIdleWatch);
+
+  // ======= ADMIN PANEL (5 taps on hidden corner hotspot) =======
+  var tapCount = 0, tapTimer = null;
+  els.adminHotspot.addEventListener('click', function(e){
+    e.stopPropagation();
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function(){ tapCount = 0; }, 2500);
+    if (tapCount >= 5){
+      tapCount = 0;
+      els.adminCount.textContent = getLeads().length;
+      els.adminModal.classList.add('open');
+    }
+  });
+  els.adminCloseBtn.addEventListener('click', function(){ els.adminModal.classList.remove('open'); });
+  els.adminChangeThemeBtn.addEventListener('click', function(){ location.href = 'index.html'; });
+  els.adminClearBtn.addEventListener('click', function(){
+    if (confirm('Tem certeza que deseja apagar todos os leads salvos neste dispositivo (todos os temas)?')){
+      localStorage.removeItem(LEADS_STORAGE_KEY);
+      els.adminCount.textContent = '0';
+    }
+  });
+  els.adminExportBtn.addEventListener('click', function(){
+    var leads = getLeads();
+    if (!leads.length){ alert('Nenhum lead salvo ainda.'); return; }
+    var header = 'tema,nome,telefone,email,data,resultado,tempo_segundos,pares_encontrados\n';
+    var rows = leads.map(function(l){
+      return [l.tema, l.nome, l.telefone, l.email, l.data, l.resultado, l.tempo_segundos, l.pares_encontrados]
+        .map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
+    }).join('\n');
+    var blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'leads_mais60_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jogos de Memória — Mais 60</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple: #430593;
+    --purple-deep: #2E0466;
+    --purple-light: #6B2FC7;
+    --green: #27CC95;
+    --green-dark: #1CA378;
+    --white: #FFFFFF;
+    --cream: #F6F1FC;
+    --danger: #E4483B;
+    --shadow: rgba(30,4,70,0.35);
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  html{ height:100%; }
+  body{
+    margin:0; padding:0; width:100%; min-height:100%;
+    background: radial-gradient(ellipse at 50% -10%, var(--purple-light) 0%, var(--purple) 45%, var(--purple-deep) 100%);
+    font-family: 'Poppins', 'Segoe UI', Verdana, Arial, sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: var(--white);
+  }
+  #app{ position: relative; width:100%; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 4vh 4vw; }
+  .deco{ position:absolute; border-radius:50%; opacity:0.10; background: var(--green); pointer-events:none; }
+
+  .hub-eyebrow{ font-size: clamp(14px,1.6vh,18px); font-weight:600; letter-spacing: 3px; color: var(--green); text-transform: uppercase; margin-bottom: 1.4vh; }
+  .hub-title{ font-size: clamp(34px,5.6vh,64px); font-weight:800; margin: 0 0 1.4vh 0; text-align:center; }
+  .hub-sub{ font-size: clamp(17px,2vh,22px); color: var(--cream); max-width: 62vw; text-align:center; margin-bottom: 6vh; }
+
+  .theme-grid{ display:flex; gap: 4vw; flex-wrap: wrap; justify-content:center; max-width: 1100px; }
+  .theme-card{
+    width: min(300px, 26vw); min-width: 240px; background: rgba(255,255,255,0.07);
+    border: 2px solid rgba(255,255,255,0.12); border-radius: 28px; padding: 4vh 2.4vw;
+    display:flex; flex-direction:column; align-items:center; gap: 1.6vh; cursor:pointer;
+    transition: transform .15s ease, background .15s ease; text-align:center;
+  }
+  .theme-card:active{ transform: scale(0.96); background: rgba(255,255,255,0.14); }
+  .theme-swatch{ width: clamp(60px,8vh,88px); height: clamp(60px,8vh,88px); border-radius: 50%; box-shadow: 0 8px 20px var(--shadow); }
+  .theme-name{ font-size: clamp(21px,2.6vh,28px); font-weight:800; }
+  .theme-tag{ font-size: clamp(13px,1.5vh,16px); color: var(--cream); }
+  .theme-cta{
+    margin-top: 0.6vh; font-size: clamp(14px,1.6vh,18px); font-weight:700; color: var(--purple-deep);
+    background: var(--green); padding: 1.2vh 4vw; border-radius: 40px;
+  }
+
+  #adminHotspot{ position:absolute; left:0; bottom:0; width: 60px; height:60px; }
+
+  .test-mode-toggle{
+    display:flex; align-items:center; gap:10px; margin-top: 4vh; font-size: clamp(13px,1.5vh,16px);
+    color: var(--cream); cursor:pointer;
+  }
+  .test-mode-toggle input{ width:20px; height:20px; accent-color: var(--green); }
+
+  /* ---------- ADMIN MODAL ---------- */
+  #adminModal{ position:fixed; inset:0; background: rgba(20,3,50,0.9); display:none; align-items:center; justify-content:center; z-index: 100; }
+  #adminModal.open{ display:flex; }
+  .admin-box{ background: var(--white); color: var(--purple-deep); border-radius: 20px; padding: 4vh 4vw; width: min(520px,88vw); text-align:center; max-height: 84vh; overflow-y:auto; }
+  .admin-box h3{ font-size: clamp(20px,2.6vh,26px); margin: 0 0 1.4vh 0; }
+  .admin-box .count{ font-size: clamp(40px,5.4vh,56px); font-weight:800; color: var(--purple); margin-bottom: 0.6vh; }
+  .admin-box .count-label{ font-size: 14px; color:#7A6A99; margin-bottom: 2vh; }
+  .sync-status{ font-size: 13px; border-radius: 10px; padding: 8px 12px; margin-bottom: 2vh; }
+  .sync-status.ok{ background: #E6F9F1; color: #1CA378; }
+  .sync-status.warn{ background: #FFF6E0; color: #A9760B; }
+  .admin-breakdown{ display:flex; justify-content:center; gap: 5vw; margin-bottom: 3vh; }
+  .admin-breakdown .item .v{ font-size: clamp(22px,2.8vh,30px); font-weight:800; color: var(--purple); }
+  .admin-breakdown .item .k{ font-size: 12px; color: #7A6A99; text-transform: capitalize; }
+  .admin-actions{ display:flex; flex-direction:column; gap: 12px; }
+  .admin-actions button{
+    font-family: inherit; font-size: clamp(15px,1.8vh,18px); font-weight:600; padding: 1.4vh 1vw;
+    border-radius: 14px; border: none; cursor:pointer;
+  }
+  #adminExportBtn{ background: var(--purple); color: var(--white); }
+  #adminClearBtn{ background: #FBEAF0; color: #99354a; }
+  #adminCloseBtn{ background: #F1EFE8; color: #444441; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="deco" style="width:44vh;height:44vh;top:-14vh;left:-14vh;"></div>
+  <div class="deco" style="width:32vh;height:32vh;bottom:-10vh;right:22vw;"></div>
+
+  <div class="hub-eyebrow">Mais 60</div>
+  <h1 class="hub-title">Jogos de Memória</h1>
+  <p class="hub-sub">Escolha o tema para preparar o tablet para o promotor. O jogo recarrega já configurado com as cores, termos e brinde daquele tema.</p>
+
+  <div class="theme-grid" id="themeGrid"></div>
+
+  <label class="test-mode-toggle">
+    <input type="checkbox" id="testModeCheck">
+    🧪 Abrir em modo teste (pula formulário, não salva leads)
+  </label>
+
+  <div id="adminHotspot"></div>
+</div>
+
+<div id="adminModal">
+  <div class="admin-box">
+    <h3>Painel administrativo</h3>
+    <div class="count" id="adminCount">0</div>
+    <div class="count-label">leads capturados neste dispositivo (todos os temas)</div>
+    <div class="sync-status" id="syncStatus"></div>
+    <div class="admin-breakdown" id="adminBreakdown"></div>
+    <div class="admin-actions">
+      <button id="adminExportBtn">Exportar leads (CSV)</button>
+      <button id="adminClearBtn">Apagar dados deste dispositivo</button>
+      <button id="adminCloseBtn">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="themes.js"></script>
+<script>
+(function(){
+
+  syncPendingLeads();
+
+  var els = {
+    themeGrid: document.getElementById('themeGrid'),
+    adminHotspot: document.getElementById('adminHotspot'),
+    adminModal: document.getElementById('adminModal'),
+    adminCount: document.getElementById('adminCount'),
+    adminBreakdown: document.getElementById('adminBreakdown'),
+    syncStatus: document.getElementById('syncStatus'),
+    adminExportBtn: document.getElementById('adminExportBtn'),
+    adminClearBtn: document.getElementById('adminClearBtn'),
+    adminCloseBtn: document.getElementById('adminCloseBtn'),
+    testModeCheck: document.getElementById('testModeCheck')
+  };
+
+  // ======= GRADE DE TEMAS =======
+  THEME_ORDER.forEach(function(id){
+    var t = THEMES[id];
+    var card = document.createElement('div');
+    card.className = 'theme-card';
+    card.innerHTML =
+      '<div class="theme-swatch" style="background:' + t.cores.purple + ';"></div>' +
+      '<div class="theme-name">' + t.nome + '</div>' +
+      '<div class="theme-tag">' + (t.tagline || '') + '</div>' +
+      '<div class="theme-cta">Selecionar</div>';
+    card.addEventListener('click', function(){
+      var url = 'game.html?tema=' + encodeURIComponent(id);
+      if (els.testModeCheck.checked) url += '&test=1';
+      location.href = url;
+    });
+    els.themeGrid.appendChild(card);
+  });
+
+  // ======= LEADS (armazenamento unificado) =======
+  function getLeads(){
+    try{ return JSON.parse(localStorage.getItem(LEADS_STORAGE_KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+
+  function renderBreakdown(){
+    var leads = getLeads();
+    els.adminCount.textContent = leads.length;
+    var counts = {};
+    THEME_ORDER.forEach(function(id){ counts[id] = 0; });
+    leads.forEach(function(l){ counts[l.tema] = (counts[l.tema] || 0) + 1; });
+    els.adminBreakdown.innerHTML = THEME_ORDER.map(function(id){
+      return '<div class="item"><div class="v">' + counts[id] + '</div><div class="k">' + THEMES[id].nome + '</div></div>';
+    }).join('');
+
+    if (!LEADS_WEBHOOK_URL){
+      els.syncStatus.textContent = 'Planilha central não configurada — leads ficam só neste tablet.';
+      els.syncStatus.className = 'sync-status warn';
+    } else {
+      var pendentes = leads.filter(function(l){ return !l.enviado; }).length;
+      if (pendentes === 0){
+        els.syncStatus.textContent = 'Tudo sincronizado com a planilha central.';
+        els.syncStatus.className = 'sync-status ok';
+      } else {
+        els.syncStatus.textContent = pendentes + ' lead(s) ainda não sincronizados (sem internet no momento do jogo). Serão reenviados automaticamente.';
+        els.syncStatus.className = 'sync-status warn';
+      }
+    }
+  }
+
+  // ======= ADMIN PANEL (5 taps no hotspot do canto) =======
+  var tapCount = 0, tapTimer = null;
+  els.adminHotspot.addEventListener('click', function(e){
+    e.stopPropagation();
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function(){ tapCount = 0; }, 2500);
+    if (tapCount >= 5){
+      tapCount = 0;
+      renderBreakdown();
+      els.adminModal.classList.add('open');
+    }
+  });
+  els.adminCloseBtn.addEventListener('click', function(){ els.adminModal.classList.remove('open'); });
+  els.adminClearBtn.addEventListener('click', function(){
+    if (confirm('Tem certeza que deseja apagar todos os leads salvos neste dispositivo (todos os temas)?')){
+      localStorage.removeItem(LEADS_STORAGE_KEY);
+      renderBreakdown();
+    }
+  });
+  els.adminExportBtn.addEventListener('click', function(){
+    var leads = getLeads();
+    if (!leads.length){ alert('Nenhum lead salvo ainda.'); return; }
+    var header = 'tema,nome,telefone,email,data,resultado,tempo_segundos,pares_encontrados\n';
+    var rows = leads.map(function(l){
+      return [l.tema, l.nome, l.telefone, l.email, l.data, l.resultado, l.tempo_segundos, l.pares_encontrados]
+        .map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
+    }).join('\n');
+    var blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'leads_mais60_todos_temas_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+})();
+</script>
+</body>
+</html>
