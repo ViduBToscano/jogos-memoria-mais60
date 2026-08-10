@@ -694,6 +694,7 @@
       els.resultSub.textContent = theme.textos.resultWinSub;
       els.prizeCard.textContent = theme.textos.prizeWin;
       els.prizeCard.className = 'prize-card';
+      els.prizeCard.style.display = theme.textos.prizeWin ? '' : 'none';
     } else {
       els.resultBadge.textContent = 'RESULTADO';
       els.resultTitle.textContent = theme.textos.resultLoseTitle;
@@ -701,6 +702,7 @@
       els.resultSub.textContent = theme.textos.resultLoseSub;
       els.prizeCard.textContent = theme.textos.prizeLose;
       els.prizeCard.className = 'prize-card participation';
+      els.prizeCard.style.display = theme.textos.prizeLose ? '' : 'none';
     }
     renderQr(els.resultQrWrap, 3);
     els.resultQrLabel.textContent = theme.textos.qrLabel;

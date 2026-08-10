@@ -88,13 +88,13 @@ var THEMES = {
     // quem completa os pares dentro do tempo concorre a uma Alexa no sorteio.
     // eventoBanner aparece na tela inicial (antes do jogo); sheetUrl é o link
     // da planilha de resultados, mostrado como botão discreto na mesma tela.
-    eventoBanner: '🎉 Evento Germinas: participe e já garanta seu brinde — complete a tempo e concorra a uma Alexa!',
+    eventoBanner: 'Participe do nosso jogo da memória e concorra a uma Alexa!',
     sheetUrl: 'https://docs.google.com/spreadsheets/d/1LAq8-KNxcKUkHjX6pNCifxZJzi6VGf3exLLWEmjTOfc/edit?usp=sharing',
     sheetLabel: 'Ver planilha de resultados',
     textos: {
       metaTitulo: 'Jogo da Memória — Mais 60',
       attractTitleHtml: 'Jogo da <span>Memória</span>',
-      attractSub: 'Encontre os pares em até 1 minuto. Participando você já garante seu brinde — e completando a tempo, concorre a uma Alexa!',
+      attractSub: 'Que tal exercitar sua memória. Participe e ganhe um brinde da Mais60. Se você concluir em até 1 minuto, você automaticamente irá concorrer a uma Alexa! Vamos lá?',
       pulseCta: 'Toque para jogar',
       leadTitle: 'Antes de começar',
       leadSub: 'Preencha seus dados para jogar. Todo participante ganha um brinde, e quem completar a tempo concorre a uma Alexa!',
@@ -102,16 +102,14 @@ var THEMES = {
       rulesTitle: 'Como funciona',
       rulesLines: [
         'Vire as cartas e encontre <b>os 8 pares iguais</b>.',
-        'Você tem <b>1 minuto</b> para completar o jogo.',
-        'Só de participar, você já ganha um <b>brinde</b>!',
-        'Completou a tempo? Você concorre a uma <b>Alexa</b> no sorteio do Germinas!'
+        'Você tem <b>1 minuto</b> para completar o jogo.'
       ],
       cardMark: '+60',
       resultWinTitle: 'Parabéns!',
-      resultWinSub: 'Você completou a tempo — seu brinde já está garantido e você entrou no sorteio da Alexa!',
+      resultWinSub: 'Você conseguiu! Achou todos os pares antes do tempo terminar. Pegue o seu brinde com a nossa equipe e boa sorte no sorteio! Se você for o sorteado, a nossa equipe entrará em contato através dos dados preenchidos anteriormente!',
       resultLoseTitle: 'Valeu por jogar!',
       resultLoseSub: 'O tempo acabou, mas seu brinde de participação já está garantido.',
-      prizeWin: '🎁 Brinde garantido + concorrendo a uma Alexa no sorteio do Germinas!',
+      prizeWin: '', // vazio: a mensagem já vai completa no resultWinSub, sem repetir num card à parte
       prizeLose: '🎁 Você ganhou o seu brinde de participação!',
       qrLabel: 'Aponte a câmera e conheça o Mais 60'
     },
