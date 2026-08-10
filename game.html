@@ -71,6 +71,17 @@
     border: 1px solid rgba(255,255,255,0.25); color: var(--cream); font-family: inherit;
     font-size: clamp(12px,1.4vh,15px); font-weight:600; border-radius: 30px; padding: 1vh 2vw; cursor:pointer;
   }
+  #sheetLinkBtn{
+    position:absolute; top: 2.4vh; right: 2.4vw; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25); color: var(--cream); font-family: inherit;
+    font-size: clamp(12px,1.4vh,15px); font-weight:600; border-radius: 30px; padding: 1vh 2vw;
+    text-decoration:none; cursor:pointer;
+  }
+  .evento-banner{
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.3); color: var(--white);
+    font-size: clamp(14px,1.7vh,18px); font-weight:600; border-radius: 30px; padding: 1.2vh 3vw;
+    margin-bottom: 2.4vh; max-width: 74vw; text-align:center;
+  }
 
   /* ---------- MODO TESTE ---------- */
   #testBadge{
@@ -212,11 +223,13 @@
     <div class="deco" style="width:44vh;height:44vh;top:-14vh;left:-14vh;"></div>
     <div class="deco" style="width:32vh;height:32vh;bottom:-10vh;right:22vw;"></div>
     <div class="attract-logo-row" id="attractLogoRow"></div>
+    <div class="evento-banner" id="eventoBanner" style="display:none;"></div>
     <h1 class="attract-title" id="attractTitle">Jogo da <span>Memória</span></h1>
     <p class="attract-sub" id="attractSub">Encontre os pares em até 1 minuto e concorra a um brinde. Toque na tela para começar!</p>
     <div class="pulse-cta" id="pulseCta">Toque para jogar</div>
     <div class="attract-qr-wrap" id="attractQrWrap"></div>
     <button id="backToHubBtn">← Trocar tema</button>
+    <a id="sheetLinkBtn" target="_blank" rel="noopener" style="display:none;"></a>
     <div id="adminHotspot"></div>
   </div>
 
@@ -368,6 +381,8 @@
     resultQrWrap: document.getElementById('resultQrWrap'),
     adminHotspot: document.getElementById('adminHotspot'),
     backToHubBtn: document.getElementById('backToHubBtn'),
+    eventoBanner: document.getElementById('eventoBanner'),
+    sheetLinkBtn: document.getElementById('sheetLinkBtn'),
     adminModal: document.getElementById('adminModal'),
     adminCount: document.getElementById('adminCount'),
     adminExportBtn: document.getElementById('adminExportBtn'),
@@ -449,6 +464,16 @@
     els.rulesTitle.textContent = theme.textos.rulesTitle;
     els.rulesBox.innerHTML = theme.textos.rulesLines.map(function(l){ return '<p>' + l + '</p>'; }).join('');
     els.resultQrLabel.textContent = theme.textos.qrLabel;
+
+    if (theme.eventoBanner){
+      els.eventoBanner.innerHTML = theme.eventoBanner;
+      els.eventoBanner.style.display = '';
+    }
+    if (theme.sheetUrl){
+      els.sheetLinkBtn.href = theme.sheetUrl;
+      els.sheetLinkBtn.textContent = theme.sheetLabel || 'Ver planilha de resultados';
+      els.sheetLinkBtn.style.display = '';
+    }
   }
   applyTheme();
   syncPendingLeads();
@@ -713,7 +738,7 @@
     location.href = 'index.html';
   });
   els.attract.addEventListener('click', function(e){
-    if (e.target.closest('#adminHotspot') || e.target.closest('#backToHubBtn')) return;
+    if (e.target.closest('#adminHotspot') || e.target.closest('#backToHubBtn') || e.target.closest('#sheetLinkBtn')) return;
     clearLeadForm();
     showScreen('lead');
   });
