@@ -58,7 +58,7 @@ var THEMES = {
   mais60: {
     id: 'mais60',
     nome: 'Mais 60',
-    tagline: 'Tema geral do produto',
+    tagline: 'Teste sua memória com a Mais60',
     cores: {
       purple: '#430593',
       purpleDeep: '#2E0466',
