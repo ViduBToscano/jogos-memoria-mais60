@@ -167,8 +167,7 @@ var THEMES = {
       rulesLines: [
         'Vire as cartas e encontre <b>os 8 pares iguais</b>.',
         'Você tem <b>1 minuto</b> para completar o jogo.',
-        'Conseguiu a tempo? Você ganha o <b>brinde principal</b>!',
-        'Não deu tempo? Você ainda ganha um <b>brinde de participação</b>.'
+        'Conseguiu a tempo? Você ganha o <b>brinde principal</b>!'
       ],
       cardMark: 'DB',
       resultWinTitle: 'Parabéns!',
