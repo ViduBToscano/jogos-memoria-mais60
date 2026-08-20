@@ -152,6 +152,9 @@ var THEMES = {
       '<div class="card-word">Imunização</div>',
       '<div class="card-word">Prevenção</div>'
     ],
+    // Mesma planilha central de leads usada por todos os temas.
+    sheetUrl: 'https://docs.google.com/spreadsheets/d/1LAq8-KNxcKUkHjX6pNCifxZJzi6VGf3exLLWEmjTOfc/edit?usp=sharing',
+    sheetLabel: 'Ver planilha de resultados',
     textos: {
       metaTitulo: 'Jogo da Memória — Desban',
       attractTitleHtml: 'Jogo da <span>Memória</span>',
@@ -214,6 +217,9 @@ var THEMES = {
       '<div class="card-word">Histórico<br>do Paciente</div>',
       '<div class="card-word">Relatórios</div>'
     ],
+    // Mesma planilha central de leads usada por todos os temas.
+    sheetUrl: 'https://docs.google.com/spreadsheets/d/1LAq8-KNxcKUkHjX6pNCifxZJzi6VGf3exLLWEmjTOfc/edit?usp=sharing',
+    sheetLabel: 'Ver planilha de resultados',
     textos: {
       metaTitulo: 'Jogo da Memória — Lifecode',
       attractTitleHtml: 'Jogo da <span>Memória</span>',
