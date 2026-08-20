@@ -173,10 +173,10 @@ var THEMES = {
       cardMark: 'DB',
       resultWinTitle: 'Parabéns!',
       resultWinSub: 'Você encontrou todos os pares dentro de 1 minuto.',
-      resultLoseTitle: 'Quase lá!',
-      resultLoseSub: 'O tempo acabou, mas você já garantiu seu brinde de participação.',
+      resultLoseTitle: 'Que pena!',
+      resultLoseSub: 'Baixe o aplicativo da Mais60 e exercite a sua memória!',
       prizeWin: '🎁 Você ganhou o brinde principal!',
-      prizeLose: '🎁 Você ganhou o brinde de participação!',
+      prizeLose: '', // vazio: não há brinde de participação no Desban, só a mensagem de resultLoseSub
       qrLabel: 'Aponte a câmera e conheça a campanha de vacinação'
     },
     qrUrl: 'https://exemplo-desban.com.br',
