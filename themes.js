@@ -121,6 +121,9 @@ var THEMES = {
     id: 'desban',
     nome: 'Desban',
     tagline: 'Mais 60 + Desban · Vacinação',
+    // Na tela de "não completou a tempo", o convite agora é só pra baixar o
+    // app Mais60 — sem QR da campanha de vacinação, que ficaria redundante.
+    ocultarQrNaDerrota: true,
     // Mesma paleta do tema Mais60 (pedido do usuário): Desban usa o
     // visual padrão do produto, só trocando o logo e as cartas do jogo.
     cores: {

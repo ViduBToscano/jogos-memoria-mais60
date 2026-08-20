@@ -303,7 +303,7 @@
       <div class="stat"><div class="v" id="resultPairs">0/8</div><div class="k">pares</div></div>
     </div>
     <div class="prize-card" id="prizeCard">🎁 Você ganhou o brinde principal!</div>
-    <div class="result-qr-wrap">
+    <div class="result-qr-wrap" id="resultQrOuter">
       <div id="resultQrWrap"></div>
       <div class="result-qr-label" id="resultQrLabel">Aponte a câmera e conheça o Mais 60</div>
     </div>
@@ -379,6 +379,7 @@
     prizeCard: document.getElementById('prizeCard'),
     attractQrWrap: document.getElementById('attractQrWrap'),
     resultQrWrap: document.getElementById('resultQrWrap'),
+    resultQrOuter: document.getElementById('resultQrOuter'),
     adminHotspot: document.getElementById('adminHotspot'),
     backToHubBtn: document.getElementById('backToHubBtn'),
     eventoBanner: document.getElementById('eventoBanner'),
@@ -704,8 +705,12 @@
       els.prizeCard.className = 'prize-card participation';
       els.prizeCard.style.display = theme.textos.prizeLose ? '' : 'none';
     }
-    renderQr(els.resultQrWrap, 3);
-    els.resultQrLabel.textContent = theme.textos.qrLabel;
+    var mostrarQr = won || !theme.ocultarQrNaDerrota;
+    els.resultQrOuter.style.display = mostrarQr ? '' : 'none';
+    if (mostrarQr){
+      renderQr(els.resultQrWrap, 3);
+      els.resultQrLabel.textContent = theme.textos.qrLabel;
+    }
     showScreen('result');
     if (won) launchConfetti();
   }
