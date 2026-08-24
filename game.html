@@ -705,7 +705,7 @@
       els.prizeCard.className = 'prize-card participation';
       els.prizeCard.style.display = theme.textos.prizeLose ? '' : 'none';
     }
-    var mostrarQr = won || !theme.ocultarQrNaDerrota;
+    var mostrarQr = !theme.ocultarQr;
     els.resultQrOuter.style.display = mostrarQr ? '' : 'none';
     if (mostrarQr){
       renderQr(els.resultQrWrap, 3);
