@@ -255,6 +255,11 @@
         <input type="email" id="inputEmail" placeholder="seuemail@exemplo.com" autocomplete="off">
         <div class="field-error" id="errEmail"></div>
       </div>
+      <div class="field">
+        <label for="inputProfissao">Profissão</label>
+        <input type="text" id="inputProfissao" placeholder="Digite sua profissão" autocomplete="off">
+        <div class="field-error" id="errProfissao"></div>
+      </div>
       <div class="consent">
         <input type="checkbox" id="inputConsent">
         <label for="inputConsent" id="consentLabel">Autorizo o uso dos meus dados para contato e a divulgação do resultado deste jogo, conforme a LGPD.</label>
@@ -499,12 +504,14 @@
     var nome = document.getElementById('inputNome').value.trim();
     var telefone = document.getElementById('inputTelefone').value.trim();
     var email = document.getElementById('inputEmail').value.trim();
+    var profissao = document.getElementById('inputProfissao').value.trim();
     var consent = document.getElementById('inputConsent').checked;
     var ok = true;
 
     document.getElementById('errNome').textContent = '';
     document.getElementById('errTelefone').textContent = '';
     document.getElementById('errEmail').textContent = '';
+    document.getElementById('errProfissao').textContent = '';
 
     if (nome.length < 2){
       document.getElementById('errNome').textContent = 'Digite seu nome completo.';
@@ -519,11 +526,15 @@
       document.getElementById('errEmail').textContent = 'Digite um e-mail válido.';
       ok = false;
     }
+    if (profissao.length < 2){
+      document.getElementById('errProfissao').textContent = 'Digite sua profissão.';
+      ok = false;
+    }
     if (!consent){
       ok = false;
     }
     if (ok){
-      currentLead = { nome: nome, telefone: telefone, email: email, timestamp: new Date().toISOString() };
+      currentLead = { nome: nome, telefone: telefone, email: email, profissao: profissao, timestamp: new Date().toISOString() };
     }
     return ok;
   }
@@ -532,10 +543,12 @@
     document.getElementById('inputNome').value = '';
     document.getElementById('inputTelefone').value = '';
     document.getElementById('inputEmail').value = '';
+    document.getElementById('inputProfissao').value = '';
     document.getElementById('inputConsent').checked = false;
     document.getElementById('errNome').textContent = '';
     document.getElementById('errTelefone').textContent = '';
     document.getElementById('errEmail').textContent = '';
+    document.getElementById('errProfissao').textContent = '';
   }
 
   function saveLeadResult(resultado, seconds, pairsFound){
@@ -546,6 +559,7 @@
       nome: currentLead.nome,
       telefone: currentLead.telefone,
       email: currentLead.email,
+      profissao: currentLead.profissao,
       data: currentLead.timestamp,
       resultado: resultado,
       tempo_segundos: seconds,
@@ -754,7 +768,7 @@
     if (validateLead()) showScreen('rules');
   });
   els.testSkipBtn.addEventListener('click', function(){
-    currentLead = { nome: 'Teste', telefone: '00000000000', email: 'teste@teste.com', timestamp: new Date().toISOString() };
+    currentLead = { nome: 'Teste', telefone: '00000000000', email: 'teste@teste.com', profissao: 'Teste', timestamp: new Date().toISOString() };
     showScreen('rules');
   });
   els.rulesBackBtn.addEventListener('click', function(){ showScreen('lead'); });
@@ -807,9 +821,9 @@
   els.adminExportBtn.addEventListener('click', function(){
     var leads = getLeads();
     if (!leads.length){ alert('Nenhum lead salvo ainda.'); return; }
-    var header = 'tema,nome,telefone,email,data,resultado,tempo_segundos,pares_encontrados\n';
+    var header = 'tema,nome,telefone,email,profissao,data,resultado,tempo_segundos,pares_encontrados\n';
     var rows = leads.map(function(l){
-      return [l.tema, l.nome, l.telefone, l.email, l.data, l.resultado, l.tempo_segundos, l.pares_encontrados]
+      return [l.tema, l.nome, l.telefone, l.email, l.profissao, l.data, l.resultado, l.tempo_segundos, l.pares_encontrados]
         .map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',');
     }).join('\n');
     var blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
